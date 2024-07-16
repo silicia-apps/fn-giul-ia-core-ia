@@ -55,8 +55,12 @@ export default async ({ req, res, log, error }: Context) => {
       Devi rispondere solamente in questo formato
     `;
 
-    log(`$memoria = ${req.body.chat.identity.memories}`);
-    log(`$stato_emotivo = ${req.body.chat.identity.emotional_state}`);
+    log(`$memoria`);
+    log(
+      req.body.chat.identity.memories ? req.body.chat.identity.memories : '{}'
+    );
+    log(`$stato_emotivo`);
+    log(req.body.chat.identity.emotional_state);
 
     if (req.method === 'GET') {
       return res.send('Silicia - Giulia BOT - core');
