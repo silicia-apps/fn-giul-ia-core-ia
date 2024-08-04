@@ -18,7 +18,7 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
   //try {
-    const gemini_si = `${process.env.GEMINI_SI!}; // $ltm_state ${ req.body.chat.identity.emotional_state? JSON.stringify(req.body.chat.identity.emotional_state) : '{}' } // $em_state ${ req.body.chat.identity.memories? req.body.chat.identity.memories : '{}' }` ;
+    const gemini_si = `${process.env.GEMINI_SI!}; // $es_state ${ req.body.chat.profile.ltm? JSON.stringify(req.body.chat.profile.ltm) : '{}' } // $es_state ${ req.body.chat.profile.es? req.body.chat.profile.es : '{}' }` ;
     log(JSON.stringify(req));
     
     if (req.method === 'GET') {
