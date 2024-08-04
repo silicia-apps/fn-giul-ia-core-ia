@@ -1,6 +1,6 @@
 import { Client, Databases, Query, ID } from 'node-appwrite';
 
-import * as process from './env.js';
+//import * as process from './env.js';
 
 function log(text: string) {
   console.log(text);
@@ -22,7 +22,7 @@ export default async ({ req, res, log, error }: Context) => {
     log (gemini_si);
     
     if (req.method === 'GET') {
-      return res.send('Silicia - Giulia BOT - core');
+      return res.send('Silicia - Giul-IA BOT - core');
     }
   } catch (e: any) {
     error(JSON.stringify(e));
