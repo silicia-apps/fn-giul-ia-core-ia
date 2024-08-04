@@ -19,7 +19,7 @@ type Context = {
 export default async ({ req, res, log, error }: Context) => {
   try {
     const gemini_si = `${process.env.GEMINI_SI!}; // $ltm_state ${ req.body.chat.identity.emotional_state? JSON.stringify(req.body.chat.identity.emotional_state) : '{}' } // $em_state ${ req.body.chat.identity.memories? req.body.chat.identity.memories : '{}' }` ;
-    log(req);
+    log(JSON.stringify(req));
     
     if (req.method === 'GET') {
       return res.send('Silicia - Giul-IA BOT - core');
