@@ -18,8 +18,12 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
   //try {
-    const gemini_si = `${process.env.GEMINI_SI!}; // $es_state ${ req.body.chat.profile.ltm? JSON.stringify(req.body.chat.profile.ltm) : '{}' } // $es_state ${ req.body.chat.profile.es? req.body.chat.profile.es : '{}' }` ;
-    log(JSON.stringify(req));
+    const system_instruction = `${process.env.GEMINI_SI!}; // $es_state ${ req.body.chat.profile.ltm? JSON.stringify(req.body.chat.profile.ltm) : '{}' } // $es_state ${ req.body.chat.profile.es? req.body.chat.profile.es : '{}' }` ;
+    const message = req.body.message;
+    
+    console.log(system_instruction);
+    console.log(message);
+
     
     if (req.method === 'GET') {
       return res.send('Silicia - Giul-IA BOT - core');
