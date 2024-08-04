@@ -18,11 +18,12 @@ type Context = {
 
 export default async ({ req, res, log, error }: Context) => {
   //try {
-    const system_instruction = `${process.env.GEMINI_SI!}; // $es_state ${ req.body.chat.profile.ltm? JSON.stringify(req.body.chat.profile.ltm) : '{}' } // $es_state ${ req.body.chat.profile.es? req.body.chat.profile.es : '{}' }` ;
+    error(req);
+    const system_instruction = `${process.env.GEMINI_SI!}; // $ltm_state ${ req.body.chat.profile.ltm? JSON.stringify(req.body.chat.profile.ltm) : '{}' } // $es_state ${ req.body.chat.profile.es? JSON.stringify(req.body.chat.profile.es) : '{}' }` ;
     const message = req.body.message;
     
-    console.log(system_instruction);
-    console.log(message);
+    log(system_instruction);
+    log(message);
 
     
     if (req.method === 'GET') {
