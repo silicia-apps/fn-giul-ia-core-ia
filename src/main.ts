@@ -44,8 +44,8 @@ export interface Module {
   name: string;
   description: string;
   queue: string[];
+  actions: string[];
   events: string[];
-  input: string[];
 }
 export interface SlotLtm {
   key: string;
@@ -154,8 +154,8 @@ const req: any = process.env.req;
             name: module.name,
             description: module.description,
             queue: module.queue,
-            events: module.events,
-            input: module.input,
+            actions: module.actions,
+            events: module.events
           });
         }
         log('search chat');
