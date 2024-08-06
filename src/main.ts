@@ -26,12 +26,12 @@ export interface HistoryItem {
 
 export interface Message {
   message: string;
-  tought: Thought;
+  thought: Thought;
   bot: boolean;
 }
 
 export interface Thought {
-  tought: string;
+  thought: string;
   message: Message;
 }
 
@@ -168,7 +168,7 @@ export default async ({ req, res, log, error }: Context) => {
               historyItems.push({
                 parts: [
                   { text: message.message },
-                  { text: message.tought.tought },
+                  { text: message.thought.thought },
                 ],
                 role: message.bot ? 'model' : 'user',
               });
