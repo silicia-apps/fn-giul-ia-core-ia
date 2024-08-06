@@ -1,7 +1,7 @@
 import { Client, Databases, Query, ID, Models } from 'node-appwrite';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-//import * as process from './env.js';
+import * as process from './env.js';
 
 function log(text: string) {
   console.log(text);
@@ -114,9 +114,10 @@ function emotionVariator(
   return new_es;
 }
 
-export default async ({ req, res, log, error }: Context) => {
-  try {
-    if (!req.body.bot) {
+//export default async ({ req, res, log, error }: Context) => {
+//  try {
+//    if (!req.body.bot) {
+const req: any = process.env.req;
       log('connect to appwrite api');
       const client = new Client()
         .setEndpoint(process.env.APPWRITE_ENDPOINT!)
@@ -192,8 +193,10 @@ export default async ({ req, res, log, error }: Context) => {
         }
         log('generate system instructions for gemini');
         let system_instruction = `${process.env.GEMINI_SI!}; // extra $action_list ${JSON.stringify(modules)} // $ltm_state ${JSON.stringify(ltm)} // ${JSON.stringify(es)}`;
-        system_instruction += `generate all outputs only in italian. hai accesso diretto alla tua memoria interna. la scala delle emozioni va da -10 a 10`;
-        const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
+        system_instruction += `generate all outputs only in italian. hai accesso diretto alla tua memoria interna. la scala delle tue emozioni va da -10 a 10`;
+        log(system_instruction);
+        log(JSON.stringify(historyItems));
+        /*const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
         const model = genAI.getGenerativeModel({
           model: process.env.GEMINI_MODEL!,
           systemInstruction: system_instruction,
@@ -212,7 +215,7 @@ export default async ({ req, res, log, error }: Context) => {
         });
         const message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
         log(`try to send this message : ${message}`);
-        const gemini_answer = JSON.parse(
+        const gemini_answer = ''; /*JSON.parse(
           (await chatSession.sendMessage(message)).response.text()
         );
         log('*** update es ***');
@@ -271,11 +274,11 @@ export default async ({ req, res, log, error }: Context) => {
             });
         } catch (e) {
           error(`error on write es to db: ${JSON.stringify(e)}`);
-        }
+        }*/
       } else {
         error('profile not found');
       }
-    }
+/*    }
   } catch (e: any) {
     error(JSON.stringify(e));
   }
@@ -283,4 +286,4 @@ export default async ({ req, res, log, error }: Context) => {
     return res.send('Silicia - Giul-IA BOT - core');
   }
   return res.empty();
-};
+};*/
