@@ -105,13 +105,13 @@ function emotionVariator(
     (<number>new_es[property]) =
       es[property] && (es[property] as number) < 10
         ? (es[property] as number) + 1
-        : 1;
+        : 10;
   } else {
     log(`${property.toString()} goes Down`);
     (<number>new_es[property]) =
       es[property] && (es[property] as number) > -10
         ? (es[property] as number) - 1
-        : -1;
+        : -10;
   }
   return new_es;
 }
