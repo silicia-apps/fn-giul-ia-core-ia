@@ -246,7 +246,7 @@ export default async ({ req, res, log, error }: Context) => {
           ID.unique(),
           {
             thought: JSON.stringify(gemini_answer.thoughts),
-            message: req.body.message.$id,
+            message: req.body.$id,
           }
         )
         .then((thought) => {
