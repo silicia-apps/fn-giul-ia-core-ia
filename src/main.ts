@@ -26,18 +26,19 @@ export interface HistoryItem {
 
 export interface Message {
   message: string;
+  tought: Thought;
   bot: boolean;
 }
 
 export interface Thought {
-  message: string;
+  tought: string;
+  message: Message;
 }
 
 export interface Chat {
   $id: string;
   channel: 'telegram' | 'alexa';
   messages: Message[];
-  thoughts: Thought[];
 }
 
 export interface Module {
@@ -163,21 +164,12 @@ export default async ({ req, res, log, error }: Context) => {
           if (chat.channel === req.body.chat.channel) {
             chat_id = chat.$id;
             log(
-              'extract messages/thoughts from chat and create history for gemini'
+              'extract messages/thought from chat and create history for gemini'
             );
             for (const message of chat.messages) {
-              messages.push({
-                message: message.message,
-                bot: message.bot,
-              });
               historyItems.push({
-                parts: [{ text: message.message }],
+                parts: [{ text: message.message }, { text: message.tought.tought }],
                 role: message.bot ? 'model' : 'user',
-              });
-            }
-            for (const thought of chat.thoughts) {
-              thoughts.push({
-                message: thought.message,
               });
             }
           }
@@ -250,8 +242,8 @@ export default async ({ req, res, log, error }: Context) => {
               process.env.APPWRITE_TABLE_TOUGHTS_ID!,
               ID.unique(),
               {
-                message: JSON.stringify(gemini_answer.thoughts),
-                chat: chat_id,
+                thought: JSON.stringify(gemini_answer.thoughts),
+                message: req.body.message.$id,
               }
             )
             .then((thought) => {
