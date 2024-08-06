@@ -116,7 +116,7 @@ function emotionVariator(
 }
 
 export default async ({ req, res, log, error }: Context) => {
-  try {
+  //try {
     if (!req.body.bot) {
       log('connect to appwrite api');
       const client = new Client()
@@ -217,7 +217,7 @@ export default async ({ req, res, log, error }: Context) => {
         gemini_answer.es['-'].forEach((emotion: any) => {
           new_es = emotionVariator(es, new_es, emotion, false);
         });
-        try {
+        //try {
           log(`Try to write new ES in database`);
           log(JSON.stringify(new_es));
           datastore
@@ -230,11 +230,11 @@ export default async ({ req, res, log, error }: Context) => {
             .then(() => {
               log(`*** Es updated ***`);
             });
-        } catch (e) {
+        /*} catch (e) {
           error(`error on write es to db: ${JSON.stringify(e)}`);
-        }
+        }*/
         log(`*** write thoughts in db`);
-        try {
+        //try {
           log(`try to write`);
           datastore
             .createDocument(
@@ -263,16 +263,16 @@ export default async ({ req, res, log, error }: Context) => {
                 );
               });
             });
-        } catch (e) {
+        /*} catch (e) {
           error(`error on write es to db: ${JSON.stringify(e)}`);
-        }
+        }*/
       } else {
         error('profile not found');
       }
     }
-  } catch (e: any) {
+  /*} catch (e: any) {
     error(JSON.stringify(e));
-  }
+  }*/
   if (req.method === 'GET') {
     return res.send('Silicia - Giul-IA BOT - core');
   }
