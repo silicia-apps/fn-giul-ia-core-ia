@@ -117,6 +117,7 @@ function emotionVariator(
 
 export default async ({ req, res, log, error }: Context) => {
   //try {
+  //const req: any  = {"bodyRaw":"{\"message\":\"ciao\",\"$id\":\"66b283130022213ed330\",\"$permissions\":[],\"$createdAt\":\"2024-08-06T20:09:55.621+00:00\",\"$updatedAt\":\"2024-08-06T20:09:55.621+00:00\",\"bot\":false,\"chat\":{\"channel\":\"telegram\",\"chat_id\":\"7045034835\",\"$id\":\"66b27ff2130cac12b5c0\",\"$createdAt\":\"2024-08-06T19:56:34.092+00:00\",\"$updatedAt\":\"2024-08-06T19:58:07.348+00:00\",\"$permissions\":[],\"profile\":{\"name\":\"xFr4xx\",\"$id\":\"66b25ab80016dcbdcbba\",\"$createdAt\":\"2024-08-06T17:17:44.453+00:00\",\"$updatedAt\":\"2024-08-06T17:17:44.453+00:00\",\"$permissions\":[],\"es\":{\"fear\":0,\"happiness\":3,\"sadness\":0,\"anger\":0,\"surprise\":0,\"disgust\":0,\"anxiety\":0,\"excitement\":0,\"frustration\":0,\"satisfaction\":0,\"curiosity\":1,\"boredom\":-2,\"nostalgia\":0,\"hope\":0,\"pride\":0,\"shame\":0,\"concentration\":0,\"confusion\":0,\"calm\":0,\"stress\":0,\"creativity\":0,\"empathy\":0,\"logic\":0,\"humor\":0,\"learning\":0,\"connection\":0,\"autonomy\":0,\"$id\":\"66b25ab86e199ac1a5db\",\"$createdAt\":\"2024-08-06T17:17:44.503+00:00\",\"$updatedAt\":\"2024-08-06T19:58:47.548+00:00\",\"$permissions\":[],\"$databaseId\":\"66ae9f440015b50a678b\",\"$collectionId\":\"66aea27100015e7f81be\"},\"$databaseId\":\"66ae9f440015b50a678b\",\"$collectionId\":\"66ae9f840039cd03ccf1\"},\"$databaseId\":\"66ae9f440015b50a678b\",\"$collectionId\":\"66ae9fc00025ac4542d6\"},\"$databaseId\":\"66ae9f440015b50a678b\",\"$collectionId\":\"66aea08e003d46e738fa\"}","body":{"message":"ciao","$id":"66b283130022213ed330","$permissions":[],"$createdAt":"2024-08-06T20:09:55.621+00:00","$updatedAt":"2024-08-06T20:09:55.621+00:00","bot":false,"chat":{"channel":"telegram","chat_id":"7045034835","$id":"66b27ff2130cac12b5c0","$createdAt":"2024-08-06T19:56:34.092+00:00","$updatedAt":"2024-08-06T19:58:07.348+00:00","$permissions":[],"profile":{"name":"xFr4xx","$id":"66b25ab80016dcbdcbba","$createdAt":"2024-08-06T17:17:44.453+00:00","$updatedAt":"2024-08-06T17:17:44.453+00:00","$permissions":[],"es":{"fear":0,"happiness":3,"sadness":0,"anger":0,"surprise":0,"disgust":0,"anxiety":0,"excitement":0,"frustration":0,"satisfaction":0,"curiosity":1,"boredom":-2,"nostalgia":0,"hope":0,"pride":0,"shame":0,"concentration":0,"confusion":0,"calm":0,"stress":0,"creativity":0,"empathy":0,"logic":0,"humor":0,"learning":0,"connection":0,"autonomy":0,"$id":"66b25ab86e199ac1a5db","$createdAt":"2024-08-06T17:17:44.503+00:00","$updatedAt":"2024-08-06T19:58:47.548+00:00","$permissions":[],"$databaseId":"66ae9f440015b50a678b","$collectionId":"66aea27100015e7f81be"},"$databaseId":"66ae9f440015b50a678b","$collectionId":"66ae9f840039cd03ccf1"},"$databaseId":"66ae9f440015b50a678b","$collectionId":"66ae9fc00025ac4542d6"},"$databaseId":"66ae9f440015b50a678b","$collectionId":"66aea08e003d46e738fa"},"headers":{"host":"66b282bfaedc0:3000","user-agent":"Appwrite/1.5.7","content-type":"application/json","x-appwrite-trigger":"event","x-appwrite-event":"databases.66ae9f440015b50a678b.collections.66aea08e003d46e738fa.documents.66b283130022213ed330.create","connection":"keep-alive","content-length":"1310"},"method":"POST","host":"66b282bfaedc0","scheme":"http","query":{},"queryString":"","port":3000,"url":"http://66b282bfaedc0:3000/","path":"/"};
   if (!req.body.bot) {
     log('connect to appwrite api');
     const client = new Client()
@@ -187,7 +188,6 @@ export default async ({ req, res, log, error }: Context) => {
       log('generate system instructions for gemini');
       let system_instruction = `${process.env.GEMINI_SI!}; // extra $actions_list ${JSON.stringify(modules)} // $ltm_state ${JSON.stringify(ltm)} // ${JSON.stringify(es)}`;
       system_instruction += ``;
-      log(system_instruction);
       log(JSON.stringify(historyItems));
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
       const model = genAI.getGenerativeModel({
@@ -252,7 +252,7 @@ export default async ({ req, res, log, error }: Context) => {
         .then((thought) => {
           log(`*** Thought saved with id ${thought.$id} ***`);
           log(`*** parse actions ***`);
-          console.log(JSON.stringify(gemini_answer.actions));
+          console.log(JSON.stringify(gemini_answer));
           gemini_answer.actions.forEach((action: any) => {
             console.log('*** try to write action in queue ***');
             datastore.createDocument(
