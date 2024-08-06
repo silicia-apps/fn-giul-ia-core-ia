@@ -117,7 +117,6 @@ function emotionVariator(
 export default async ({ req, res, log, error }: Context) => {
   try {
     if (!req.body.bot) {
-const req: any = process.env.req;
       log('connect to appwrite api');
       const client = new Client()
         .setEndpoint(process.env.APPWRITE_ENDPOINT!)
