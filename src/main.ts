@@ -238,6 +238,7 @@ export default async ({ req, res, log, error }: Context) => {
       log(`*** write thoughts in db`);
       //try {
       log(`try to write`);
+      console.log(JSON.stringify(req))
       datastore
         .createDocument(
           process.env.APPWRITE_DATABASE_ID!,
