@@ -94,6 +94,18 @@ export interface Profile extends Models.Document {
   modules: Module[];
 }
 
+function hasJsonStructure(str: string) {
+  if (typeof str !== 'string') return false;
+  try {
+      const result = JSON.parse(str);
+      const type = Object.prototype.toString.call(result);
+      return type === '[object Object]' 
+          || type === '[object Array]';
+  } catch (err) {
+      return false;
+  }
+}
+
 function emotionVariator(
   es: Es,
   new_es: Es,
@@ -213,7 +225,12 @@ if (!req.body.bot) {
       generationConfig: generationConfig,
       history: historyItems,
     });
-    const message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
+    let message: string;
+    if (hasJsonStructure(req.body.message)) {
+      message = req.body.message;
+    } else {
+      message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
+    }
     log(JSON.stringify(historyItems));
     log(`try to send this message : ${message}`);
     const gemini_answer = JSON.parse(
