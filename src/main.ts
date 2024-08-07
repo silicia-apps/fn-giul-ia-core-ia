@@ -225,8 +225,10 @@ if (!req.body.bot) {
     });
     let message: string;
     if (hasJsonStructure(req.body.message)) {
+      console.log('message is a JSON file');
       message = req.body.message;
     } else {
+      console.log('message is a input from chat');
       message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
     }
     log(`try to send this message : ${message}`);
