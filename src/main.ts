@@ -172,7 +172,6 @@ if (!req.body.bot) {
         chat_id = chat.$id;
         log('extract messages/thought from chat and create history for gemini');
         if (chat.messages.length > 1) {
-          console.log(JSON.stringify(chat.messages));
           for (const message of chat.messages) {
             const thoughts: Models.DocumentList<Thought> =
               await datastore.listDocuments(
@@ -207,7 +206,6 @@ if (!req.body.bot) {
     log('generate system instructions for gemini');
     let system_instruction = `${process.env.GEMINI_SI!}; // extra $actions_list ${JSON.stringify(modules)} // $ltm_state ${JSON.stringify(ltm)} // ${JSON.stringify(es)}`;
     system_instruction += ``;
-    log(JSON.stringify(historyItems));
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
     const model = genAI.getGenerativeModel({
       model: process.env.GEMINI_MODEL!,
@@ -231,11 +229,11 @@ if (!req.body.bot) {
     } else {
       message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
     }
-    log(JSON.stringify(historyItems));
     log(`try to send this message : ${message}`);
     const gemini_answer = JSON.parse(
       (await chatSession.sendMessage(message)).response.text()
     );
+    console.log(JSON.stringify(gemini_answer));
     log('*** update es ***');
     let new_es: Es = { $id: profile.es.$id };
     gemini_answer.es['+'].forEach((emotion: any) => {
@@ -246,7 +244,6 @@ if (!req.body.bot) {
     });
     try {
     log(`Try to write new ES in database`);
-    log(JSON.stringify(new_es));
     datastore
       .updateDocument(
         process.env.APPWRITE_DATABASE_ID!,
@@ -263,7 +260,6 @@ if (!req.body.bot) {
     log(`*** write thoughts in db`);
     try {
     log(`try to write`);
-    console.log(JSON.stringify(req));
     datastore
       .createDocument(
         process.env.APPWRITE_DATABASE_ID!,
@@ -277,7 +273,6 @@ if (!req.body.bot) {
       .then((thought) => {
         log(`*** Thought saved with id ${thought.$id} ***`);
         log(`*** parse actions ***`);
-        console.log(JSON.stringify(gemini_answer));
         gemini_answer.actions.forEach((action: any) => {
           console.log('*** try to write action in queue ***');
           datastore.createDocument(
