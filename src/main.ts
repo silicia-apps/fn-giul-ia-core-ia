@@ -249,7 +249,7 @@ export default async ({ req, res, log, error }: Context) => {
           console.log(JSON.stringify(gemini_answer));
         } catch (e) {
           error(`Error on gemini API`);
-          error(JSON.stringify(e));
+          error(String(e));
         }
         log('*** update es ***');
         let new_es: Es = { $id: profile.es.$id };
@@ -311,7 +311,7 @@ export default async ({ req, res, log, error }: Context) => {
       }
     }
   } catch (e: any) {
-    error(JSON.stringify(e));
+    error(String(e));
   }
   if (req.method === 'GET') {
     return res.send('Silicia - Giul-IA BOT - core');
