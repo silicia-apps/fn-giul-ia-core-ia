@@ -224,10 +224,11 @@ if (!req.body.bot) {
       history: historyItems,
     });
     let message: string;
-    if (hasJsonStructure(req.body.message)) {
+    try {
+      JSON.parse(req.body.message);
       console.log('message is a JSON file');
       message = req.body.message;
-    } else {
+    } catch (e) {
       console.log('message is a input from chat');
       message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
     }
