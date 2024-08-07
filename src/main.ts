@@ -240,17 +240,11 @@ export default async ({ req, res, log, error }: Context) => {
           console.log('message is a input from chat');
           message = `{ 'module': 'core', 'action': 'event', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
         }
-        let gemini_answer : any = {};
-        try {
-          log(`try to send this message : ${message}`);
-          const gemini_answer = JSON.parse(
-            (await chatSession.sendMessage(message)).response.text()
-          );
-          console.log(JSON.stringify(gemini_answer));
-        } catch (e) {
-          error(`Error on gemini API`);
-          error(String(e));
-        }
+        log(`try to send this message : ${message}`);
+        const gemini_answer = JSON.parse(
+          (await chatSession.sendMessage(message)).response.text()
+        );
+        console.log(JSON.stringify(gemini_answer));
         log('*** update es ***');
         let new_es: Es = { $id: profile.es.$id };
         gemini_answer.es['+'].forEach((emotion: any) => {
