@@ -42,6 +42,7 @@ export interface Chat {
   channel: 'telegram' | 'alexa';
   messages: Message[];
   profile: Profile;
+  chatid: string;
 }
 
 export interface Module {
@@ -135,10 +136,9 @@ export default async ({ req, res, log, error }: Context) => {
       error(text);
     }
   }
-
-  debug(`request: ${JSON.stringify(req)}`);
   try {
     const body: Message = req.body;
+    debug(`request: ${JSON.stringify(body)}`);
     if (!body.bot) {
       log('connect to appwrite api');
       const client = new Client()
@@ -209,6 +209,7 @@ export default async ({ req, res, log, error }: Context) => {
             }
           }
         }
+        debug(`history: ${JSON.stringify(historyItems)}`);
         log('extract ltm');
         const ltm: SlotLtm[] = [];
         let user_language: string = 'en';
@@ -219,7 +220,7 @@ export default async ({ req, res, log, error }: Context) => {
             value: slot.value,
           });
         }
-
+        debug(`long term memory: ${JSON.stringify(ltm)}`);
         log('Generate system instructions for gemini');
         let system_instruction = `${process.env.GEMINI_SI!}; // extra $actions_list ${JSON.stringify(modules)} // $ltm_state ${JSON.stringify(ltm)} // ${JSON.stringify(es)}`;
         // add some extra test system instructions
@@ -227,11 +228,11 @@ export default async ({ req, res, log, error }: Context) => {
         log(`Add ${extra_si} to System Instructions`);
         system_instruction += ``;
         log(`Set language to ${user_language}`);
-        system_instruction = system_instruction.replace(
-          '$user_language',
+        system_instruction = system_instruction.replaceAll(
+          '@user_language@',
           user_language
         );
-        log(system_instruction);
+        debug(`system instructions: ${system_instruction}`);
         log('start chat with gemini api');
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
         const model = genAI.getGenerativeModel({
@@ -251,19 +252,21 @@ export default async ({ req, res, log, error }: Context) => {
           history: historyItems,
         });
         let message: string;
+        console.log('Check if the message is in JSON format');
         try {
-          JSON.parse(req.body.message);
-          console.log('message is a JSON file');
-          message = req.body.message;
+          JSON.parse(body.message);
+          console.log('The message is in JSON format');
+          message = body.message;
         } catch (e) {
-          console.log('message is a input from chat');
-          message = `{ 'module': 'core', 'action': 'input', 'channel': '${req.body.chat.channel}', 'payload': { 'chatid': '${req.body.chat.chat_id}', 'value' : '${req.body.message}' }}`;
+          console.log('The message is a input from chat');
+          message = `{ 'module': 'core', 'action': 'input', 'channel': '${body.chat.channel}', 'payload': { 'chatid': '${body.chat.chatid}', 'value' : '${body.message}' }}`;
         }
-        log(`try to send this message : ${message}`);
+        log(`try to send message to gemini`);
+        debug(`message: ${message}`);
         const gemini_answer = JSON.parse(
           (await chatSession.sendMessage(message)).response.text()
         );
-        console.log(JSON.stringify(gemini_answer));
+        debug(`gemini answer: ${JSON.stringify(gemini_answer)}`);
         log('*** update es ***');
         let new_es: Es = { $id: profile.es.$id };
         gemini_answer.es['+'].forEach((emotion: any) => {
@@ -272,62 +275,57 @@ export default async ({ req, res, log, error }: Context) => {
         gemini_answer.es['-'].forEach((emotion: any) => {
           new_es = emotionVariator(es, new_es, emotion, false);
         });
-        try {
-          log(`Try to write new ES in database`);
-          datastore
-            .updateDocument(
-              process.env.APPWRITE_DATABASE_ID!,
-              process.env.APPWRITE_TABLE_EM_ID!,
-              es.$id,
-              new_es
-            )
-            .then(() => {
-              log(`*** Es updated ***`);
-            });
-        } catch (e) {
-          error(`error on write es to db: ${JSON.stringify(e)}`);
-        }
+        log(`Try to write new ES in database`);
+        datastore
+          .updateDocument(
+            process.env.APPWRITE_DATABASE_ID!,
+            process.env.APPWRITE_TABLE_EM_ID!,
+            es.$id,
+            new_es
+          )
+          .then(() => {
+            log(`*** Es updated ***`);
+          });
+        debug(`Variation of emotions: ${new_es}`);
         log(`*** write thoughts in db`);
-        try {
-          log(`try to write`);
-          datastore
-            .createDocument(
-              process.env.APPWRITE_DATABASE_ID!,
-              process.env.APPWRITE_TABLE_TOUGHTS_ID!,
-              ID.unique(),
-              {
-                thought: JSON.stringify(gemini_answer.thoughts),
-                message: req.body.$id,
-              }
-            )
-            .then((thought) => {
-              log(`*** Thought saved with id ${thought.$id} ***`);
-              log(`*** parse actions ***`);
-              gemini_answer.actions.forEach((action: any) => {
-                console.log('*** try to write action in queue ***');
-                datastore.createDocument(
-                  process.env.APPWRITE_DATABASE_ID!,
-                  process.env.APPWRITE_TABLE_ACTIONS_ID!,
-                  ID.unique(),
-                  {
-                    action: JSON.stringify(action),
-                    thought: thought.$id,
-                  }
-                );
-              });
+        log(`write new thought`);
+        debug(`new thought: ${JSON.stringify(gemini_answer.thoughts)}`);
+        datastore
+          .createDocument(
+            process.env.APPWRITE_DATABASE_ID!,
+            process.env.APPWRITE_TABLE_TOUGHTS_ID!,
+            ID.unique(),
+            {
+              thought: JSON.stringify(gemini_answer.thoughts),
+              message: req.body.$id,
+            }
+          )
+          .then((thought) => {
+            log(`*** Thought saved with id ${thought.$id} ***`);
+            log(`*** parse actions ***`);
+            gemini_answer.actions.forEach((action: any) => {
+              console.log('*** try to write action in queue ***');
+              datastore.createDocument(
+                process.env.APPWRITE_DATABASE_ID!,
+                process.env.APPWRITE_TABLE_ACTIONS_ID!,
+                ID.unique(),
+                {
+                  action: JSON.stringify(action),
+                  thought: thought.$id,
+                }
+              );
+              debug(`new actions: ${JSON.stringify(action)}`);
             });
-        } catch (e) {
-          error(`error on write es to db: ${JSON.stringify(e)}`);
-        }
+          });
       } else {
         error('profile not found');
       }
     }
+    if (req.method === 'GET') {
+      return res.send('Silicia - Giul-IA BOT - core');
+    }
+    return res.empty();
   } catch (e: any) {
     error(String(e));
   }
-  if (req.method === 'GET') {
-    return res.send('Silicia - Giul-IA BOT - core');
-  }
-  return res.empty();
 };
