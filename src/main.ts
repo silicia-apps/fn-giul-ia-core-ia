@@ -11,7 +11,7 @@ function error(text: string) {
 }
 
 function debug(text: string) {
-  if (process.env.DEBUG!) {
+  if (process.env.DEBUG.toLowerCase() === 'true') {
     error(text);
   }
 }
