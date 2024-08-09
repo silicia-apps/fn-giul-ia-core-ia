@@ -265,12 +265,14 @@ export default async ({ req, res, log, error }: Context) => {
         debug(`gemini answer: ${JSON.stringify(gemini_answer)}`);
         log('*** update es ***');
         let new_es: Es = { $id: profile.es.$id };
+        if (gemini_answer.es['+']) {
         gemini_answer.es['+'].forEach((emotion: any) => {
           new_es = emotionVariator(es, new_es, emotion);
-        });
+        });}
+        if(gemini_answer.es['-']) {
         gemini_answer.es['-'].forEach((emotion: any) => {
           new_es = emotionVariator(es, new_es, emotion, false);
-        });
+        });}
         log(`Try to write new ES in database`);
         datastore
           .updateDocument(
