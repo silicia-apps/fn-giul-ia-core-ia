@@ -256,6 +256,7 @@ export default async ({ req, res, log, error }: Context) => {
         } catch (e) {
           console.log('The message is a input from chat');
           message = `{ 'module': 'core', 'action': 'input', 'channel': '${body.chat.channel}', 'payload': { 'chatid': '${body.chat.chatid}', 'value' : '${body.message}' }}`;
+          message = message.replaceAll("'", "'");
         }
         log(`try to send message to gemini`);
         debug(`message: ${message}`);
@@ -265,14 +266,20 @@ export default async ({ req, res, log, error }: Context) => {
         debug(`gemini answer: ${JSON.stringify(gemini_answer)}`);
         log('*** update es ***');
         let new_es: Es = { $id: profile.es.$id };
-        if (gemini_answer.es['+']) {
-        gemini_answer.es['+'].forEach((emotion: any) => {
-          new_es = emotionVariator(es, new_es, emotion);
-        });}
-        if(gemini_answer.es['-']) {
-        gemini_answer.es['-'].forEach((emotion: any) => {
-          new_es = emotionVariator(es, new_es, emotion, false);
-        });}
+        try {
+          gemini_answer.es['+'].forEach((emotion: any) => {
+            new_es = emotionVariator(es, new_es, emotion);
+          });
+        } catch (e) {
+          debug('no + variations');
+        }
+        try {
+          gemini_answer.es['-'].forEach((emotion: any) => {
+            new_es = emotionVariator(es, new_es, emotion, false);
+          });
+        } catch (e) {
+          debug('no - variations');
+        }
         log(`Try to write new ES in database`);
         datastore
           .updateDocument(
