@@ -10,12 +10,6 @@ function error(text: string) {
   console.error(text);
 }
 
-function debug(text: string) {
-  if (process.env.DEBUG!.toLowerCase() === 'true') {
-    error(text);
-  }
-}
-
 type Context = {
   req: any;
   res: any;
@@ -136,6 +130,12 @@ function emotionVariator(
 }
 
 export default async ({ req, res, log, error }: Context) => {
+  function debug(text: string) {
+    if (process.env.DEBUG!.toLowerCase() === 'true') {
+      error(text);
+    }
+  }
+
   debug(`request: ${JSON.stringify(req)}`);
   try {
     const body: Message = req.body;
@@ -153,14 +153,11 @@ export default async ({ req, res, log, error }: Context) => {
         await datastore.listDocuments(
           process.env.APPWRITE_DATABASE_ID!,
           process.env.APPWRITE_TABLE_PROFILES_ID!,
-          [
-            Query.equal('$id', String(body.chat.profile.$id)),
-            Query.limit(1),
-          ]
+          [Query.equal('$id', String(body.chat.profile.$id)), Query.limit(1)]
         );
-      if (profiles.total > 0) { 
+      if (profiles.total > 0) {
         const profile = profiles.documents[0];
-        debug (`profile: ${JSON.stringify(profile)}`);
+        debug(`profile: ${JSON.stringify(profile)}`);
         const historyItems: HistoryItem[] = [];
         const messages: Message[] = [];
         const thoughts: Thought[] = [];
@@ -179,7 +176,7 @@ export default async ({ req, res, log, error }: Context) => {
             events: module.events,
           });
         }
-        debug(`installed modules: ${JSON.stringify(module)}`);
+        debug(`installed modules: ${JSON.stringify(modules)}`);
         log('search chat');
         let chatid = '';
         for (const chat of profile.chats) {
@@ -230,7 +227,10 @@ export default async ({ req, res, log, error }: Context) => {
         log(`Add ${extra_si} to System Instructions`);
         system_instruction += ``;
         log(`Set language to ${user_language}`);
-        system_instruction = system_instruction.replace('$user_language',user_language);
+        system_instruction = system_instruction.replace(
+          '$user_language',
+          user_language
+        );
         log(system_instruction);
         log('start chat with gemini api');
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY!);
@@ -245,7 +245,7 @@ export default async ({ req, res, log, error }: Context) => {
           maxOutputTokens: 500,
           responseMimeType: 'application/json',
         };
-        
+
         const chatSession = model.startChat({
           generationConfig: generationConfig,
           history: historyItems,
