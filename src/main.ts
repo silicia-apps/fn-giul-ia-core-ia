@@ -117,13 +117,13 @@ function emotionVariator(
   if (positive) {
     log(`${property.toString()} goes UP`);
     (<number>new_es[property]) =
-      es[property] && (es[property] as number) < 10
+      (es[property] as number) < 10
         ? (es[property] as number) + 1
         : 10;
   } else {
     log(`${property.toString()} goes Down`);
     (<number>new_es[property]) =
-      es[property] && (es[property] as number) > -10
+      (es[property] as number) > -10
         ? (es[property] as number) - 1
         : -10;
   }
@@ -286,7 +286,7 @@ export default async ({ req, res, log, error }: Context) => {
           .then(() => {
             log(`*** Es updated ***`);
           });
-        debug(`Variation of emotions: ${new_es}`);
+        debug(`Variation of emotions: ${JSON.stringify(new_es)}`);
         log(`*** write thoughts in db`);
         log(`write new thought`);
         debug(`new thought: ${JSON.stringify(gemini_answer.thoughts)}`);
