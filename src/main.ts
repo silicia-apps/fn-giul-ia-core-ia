@@ -117,15 +117,11 @@ function emotionVariator(
   if (positive) {
     log(`${property.toString()} goes UP`);
     (<number>new_es[property]) =
-      (es[property] as number) < 10
-        ? (es[property] as number) + 1
-        : 10;
+      (es[property] as number) < 10 ? (es[property] as number) + 1 : 10;
   } else {
     log(`${property.toString()} goes Down`);
     (<number>new_es[property]) =
-      (es[property] as number) > -10
-        ? (es[property] as number) - 1
-        : -10;
+      (es[property] as number) > -10 ? (es[property] as number) - 1 : -10;
   }
   return new_es;
 }
@@ -290,34 +286,31 @@ export default async ({ req, res, log, error }: Context) => {
         log(`*** write thoughts in db`);
         log(`write new thought`);
         debug(`new thought: ${JSON.stringify(gemini_answer.thoughts)}`);
-        datastore
-          .createDocument(
+        const thought = await datastore.createDocument(
+          process.env.APPWRITE_DATABASE_ID!,
+          process.env.APPWRITE_TABLE_TOUGHTS_ID!,
+          ID.unique(),
+          {
+            thought: JSON.stringify(gemini_answer.thoughts),
+            chat: chatid,
+            message: req.body.$id,
+          }
+        );
+        log(`*** Thought saved with id ${thought.$id} ***`);
+        log(`*** parse actions ***`);
+        gemini_answer.actions.forEach((action: any) => {
+          console.log('*** try to write action in queue ***');
+          datastore.createDocument(
             process.env.APPWRITE_DATABASE_ID!,
-            process.env.APPWRITE_TABLE_TOUGHTS_ID!,
+            process.env.APPWRITE_TABLE_ACTIONS_ID!,
             ID.unique(),
             {
-              thought: JSON.stringify(gemini_answer.thoughts),
-              chat: chatid,
-              message: req.body.$id,
+              action: JSON.stringify(action),
+              thought: thought.$id,
             }
-          )
-          .then((thought) => {
-            log(`*** Thought saved with id ${thought.$id} ***`);
-            log(`*** parse actions ***`);
-            gemini_answer.actions.forEach((action: any) => {
-              console.log('*** try to write action in queue ***');
-              datastore.createDocument(
-                process.env.APPWRITE_DATABASE_ID!,
-                process.env.APPWRITE_TABLE_ACTIONS_ID!,
-                ID.unique(),
-                {
-                  action: JSON.stringify(action),
-                  thought: thought.$id,
-                }
-              );
-              debug(`new actions: ${JSON.stringify(action)}`);
-            });
-          });
+          );
+          debug(`new actions: ${JSON.stringify(action)}`);
+        });
       } else {
         error('profile not found');
       }
