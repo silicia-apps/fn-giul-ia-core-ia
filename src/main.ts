@@ -35,6 +35,7 @@ export interface Message {
 export interface Thought extends Models.Document {
   thought: string;
   message: Message;
+  chat: Chat;
 }
 
 export interface Chat {
@@ -250,8 +251,9 @@ export default async ({ req, res, log, error }: Context) => {
         let message: string;
         console.log('Check if the message is in JSON format');
         try {
-          JSON.parse(body.message);
+          const action: any = JSON.parse(body.message);
           console.log('The message is in JSON format');
+          action.action = "input";
           message = body.message;
         } catch (e) {
           console.log('The message is a input from chat');
@@ -296,7 +298,7 @@ export default async ({ req, res, log, error }: Context) => {
         log(`*** write thoughts in db`);
         log(`write new thought`);
         debug(`new thought: ${JSON.stringify(gemini_answer.thoughts)}`);
-        const thought = await datastore.createDocument(
+        const thought :any = await datastore.createDocument(
           process.env.APPWRITE_DATABASE_ID!,
           process.env.APPWRITE_TABLE_TOUGHTS_ID!,
           ID.unique(),
@@ -309,6 +311,11 @@ export default async ({ req, res, log, error }: Context) => {
         log(`*** Thought saved with id ${thought.$id} ***`);
         log(`*** parse actions ***`);
         gemini_answer.actions.forEach((action: any) => {
+          if (action.payload) {
+            action.payload.chatid = thought.chat.$id;
+          } else {
+            action.payload = { chatid: thought.chat.$id}
+          }
           console.log('*** try to write action in queue ***');
           datastore.createDocument(
             process.env.APPWRITE_DATABASE_ID!,
