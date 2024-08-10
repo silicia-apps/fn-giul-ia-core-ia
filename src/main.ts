@@ -255,8 +255,9 @@ export default async ({ req, res, log, error }: Context) => {
           message = body.message;
         } catch (e) {
           console.log('The message is a input from chat');
-          message = `{ 'module': 'core', 'action': 'input', 'channel': '${body.chat.channel}', 'payload': { 'chatid': '${body.chat.chatid}', 'value' : '${body.message}' }}`;
-          message = message.replaceAll("'", "'");
+          message = req.body.message.replaceAll('"', '\"');
+          message = `{ "module": "core", "action": "input", "channel": "${body.chat.channel}", "payload": { "chatid": "${body.chat.chatid}", "value" : "${message}" }}`;
+          
         }
         log(`try to send message to gemini`);
         debug(`message: ${message}`);
