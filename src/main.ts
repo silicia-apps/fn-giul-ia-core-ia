@@ -298,7 +298,7 @@ export default async ({ req, res, log, error }: Context) => {
         log(`*** write thoughts in db`);
         log(`write new thought`);
         debug(`new thought: ${JSON.stringify(gemini_answer.thoughts)}`);
-        const thought :any = await datastore.createDocument(
+        const thought = await datastore.createDocument(
           process.env.APPWRITE_DATABASE_ID!,
           process.env.APPWRITE_TABLE_TOUGHTS_ID!,
           ID.unique(),
@@ -311,11 +311,6 @@ export default async ({ req, res, log, error }: Context) => {
         log(`*** Thought saved with id ${thought.$id} ***`);
         log(`*** parse actions ***`);
         gemini_answer.actions.forEach((action: any) => {
-          if (action.payload) {
-            action.payload.chatid = thought.chat.$id;
-          } else {
-            action.payload = { chatid: thought.chat.$id}
-          }
           console.log('*** try to write action in queue ***');
           datastore.createDocument(
             process.env.APPWRITE_DATABASE_ID!,
