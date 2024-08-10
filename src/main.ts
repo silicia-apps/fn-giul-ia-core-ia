@@ -219,7 +219,7 @@ export default async ({ req, res, log, error }: Context) => {
         }
         debug(`long term memory: ${JSON.stringify(ltm)}`);
         log('Generate system instructions for gemini');
-        let system_instruction = `${process.env.GEMINI_SI!}; // extra $actions_list ${JSON.stringify(modules)} // $ltm_state ${JSON.stringify(ltm)} // $es_state ${JSON.stringify(es)}`;
+        let system_instruction = `${process.env.GEMINI_SI!}; // extra $actions_list ${JSON.stringify(modules)} // my $ltm ${JSON.stringify(ltm)} // my $em ${JSON.stringify(es)}`;
         // add some extra test system instructions
         const extra_si = ``;
         log(`Add ${extra_si} to System Instructions`);
