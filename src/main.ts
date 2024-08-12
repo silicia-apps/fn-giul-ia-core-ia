@@ -259,7 +259,6 @@ export default async ({ req, res, log, error }: Context) => {
           console.log('The message is a input from chat');
           message = req.body.message.replaceAll('"', '\"');
           message = `{ "module": "core", "action": "input", "channel": "${body.chat.channel}", "payload": { "chatid": "${body.chat.chatid}", "value" : "${message}" }}`;
-          
         }
         log(`try to send message to gemini`);
         debug(`message: ${message}`);
@@ -297,13 +296,14 @@ export default async ({ req, res, log, error }: Context) => {
         debug(`Variation of emotions: ${JSON.stringify(new_es)}`);
         log(`*** write thoughts in db`);
         log(`write new thought`);
+        const new_thought = (gemini_answer.thoughts)?gemini_answer.thoughts:gemini_answer;
         debug(`new thought: ${JSON.stringify(gemini_answer.thoughts)}`);
         const thought = await datastore.createDocument(
           process.env.APPWRITE_DATABASE_ID!,
           process.env.APPWRITE_TABLE_TOUGHTS_ID!,
           ID.unique(),
           {
-            thought: JSON.stringify(gemini_answer.thoughts),
+            thought: JSON.stringify(new_thought),
             chat: chatid,
             message: req.body.$id,
           }
