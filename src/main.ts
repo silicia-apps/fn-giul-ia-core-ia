@@ -238,8 +238,6 @@ export default async ({ req, res, log, error }: Context) => {
         });
         const generationConfig = {
           temperature: 2,
-          topP: 0.95,
-          topK: 64,
           maxOutputTokens: 500,
           responseMimeType: 'application/json',
         };
